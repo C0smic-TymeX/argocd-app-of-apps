@@ -1,21 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: guestbook
+  name: guestbook-appset
   namespace: argocd
 spec:
   generators:
     - list:
         elements:
-          - cluster: dev
-            url: https://dev-cluster-url
-          - cluster: staging
-            url: https://staging-cluster-url
-          - cluster: prod
-            url: https://prod-cluster-url
+          - env: dev
+            namespace: guestbook-dev
+          - env: staging
+            namespace: guestbook-staging
   template:
     metadata:
-      name: "guestbook-{{cluster}}"  # tên tự động theo cluster
+      name: "guestbook-{{env}}"
     spec:
       project: default
       source:
@@ -23,8 +21,8 @@ spec:
         targetRevision: HEAD
         path: guestbook
       destination:
-        server: "{{url}}"            # url tự điền từ generator
-        namespace: guestbook
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
       syncPolicy:
         automated:
           selfHeal: true
